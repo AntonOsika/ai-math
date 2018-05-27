@@ -5,6 +5,7 @@ from keras.preprocessing.sequence import pad_sequences
 
 
 chr_to_int = {str(i): i for i in range(10)}
+
 ops = ['+', '*', '<', '>']
 for op in ops:
     chr_to_int[op] = len(chr_to_int)
@@ -30,6 +31,23 @@ inputs = [inp]
 model = keras.models.Model(inputs, outputs)
 model.compile(loss='sparse_categorical_crossentropy', optimizer='Adam', metrics=['acc'])
 
+
+def expr_to_data(expr):
+    return np.array([[chr_to_int[c] for c in expr]])
+
+
+def eval_val():
+    for s in val_set:
+        x = expr_to_data(s)
+        y = np.array([eval(s)])
+        res = model.evaluate(x, y, verbose=0)
+        yhat = model.predict(x, verbose=0)
+        print(s, '=', y[0])
+        print('Model score', res)
+        print('Model pred', yhat.argmax())
+        print('p(label)', yhat[0, int(y[0])])
+
+
 def data():
     xs = []
     ys = []
@@ -47,7 +65,7 @@ def data():
             continue
 
         y = eval(s)
-        
+
         x = [chr_to_int[c] for c in s]
 
         xs.append(x)
